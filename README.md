@@ -1,21 +1,21 @@
-##Deploying a sharded MongoDB(3.2+) cluster with Ansible(2.1+)
+##Deploying a sharded MongoDB(3.2+) cluster with Ansible(2.2+)
 ------------------------------------------------------------------------------
 
-- Requires Ansible 2.1+ 
+- Requires Ansible 2.2+
 - Expects CentOS/RHEL 7 hosts
 
-Rewrite from [ansible mongodb example](https://github.com/ansible/ansible-examples/tree/master/mongodb) with mongodb3.2, ansible2.1, CentOS 7.
- 
+Rewrite from [ansible mongodb example](https://github.com/ansible/ansible-examples/tree/master/mongodb) with mongodb3.2, ansible2.2, CentOS 7.
+
 ![Alt text](images/site.png "Site")
 
-The diagram above illustrates the deployment model for a MongoDB cluster deployed by Ansible. 
-This deployment model focuses on deploying three shard servers, each having a replica set, 
-with the backup replica servers serving as the other two shard primaries. The configuration 
+The diagram above illustrates the deployment model for a MongoDB cluster deployed by Ansible.
+This deployment model focuses on deploying three shard servers, each having a replica set,
+with the backup replica servers serving as the other two shard primaries. The configuration
 servers are co-located with the shards. The mongos servers are best deployed on seperate servers.
 This is the minimum recomended configuration for a production-grade MongoDB deployment.
-Please note that the playbooks are capable of deploying N node clusters, not limited to three. 
+Please note that the playbooks are capable of deploying N node clusters, not limited to three.
 Also, all the processes are secured using keyfiles.
- 
+
 ### Deployment Example
 ------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ The inventory file looks as follows:
 		mongo2
 		mongo3
 
-		#The list of servers where mongos servers would run. 
+		#The list of servers where mongos servers would run.
 		[mongos_servers]
 		mongos1
 		mongos2
@@ -47,7 +47,7 @@ The inventory file looks as follows:
 Build the site by mongodb playbook using the following command:
 
 		ansible-playbook -i hosts site.yml
-		
+
 Build the site by **vagrant ansible provision** using the following command:
 
 		vagrant up		
@@ -58,11 +58,11 @@ Build the site by **vagrant ansible provision** using the following command:
 
 
 Once configuration and deployment has completed we can check replication set availability by connecting to individual primary replication set nodes.
-Run `vagrant ssh mongo1 ` to login then exec `mongo localhost/admin -u admin -p 123456` 
+Run `vagrant ssh mongo1 ` to login then exec `mongo localhost/admin -u admin -p 123456`
 and issue the command to query the status of replication set, we should get a similar output.
- 
+
     mongos> sh.status()
-    --- Sharding Status --- 
+    --- Sharding Status ---
       sharding version: {
         "_id" : 1,
         "minCompatibleVersion" : 5,
@@ -79,7 +79,7 @@ and issue the command to query the status of replication set, we should get a si
         Currently enabled:  yes
         Currently running:  no
         Failed balancer rounds in last 5 attempts:  0
-        Migration Results for the last 24 hours: 
+        Migration Results for the last 24 hours:
             4 : Success
       databases:
         {  "_id" : "test",  "primary" : "mongo2",  "partitioned" : true }
@@ -91,9 +91,9 @@ and issue the command to query the status of replication set, we should get a si
                     mongo1	1
                     mongo2	1
                     mongo3	1
-                { "createTime" : { "$minKey" : 1 } } -->> { "createTime" : ISODate("0381-01-05T14:15:47.299Z") } on : mongo1 Timestamp(2, 0) 
-                { "createTime" : ISODate("0381-01-05T14:15:47.299Z") } -->> { "createTime" : ISODate("2584-01-05T14:15:47.299Z") } on : mongo3 Timestamp(3, 0) 
-                { "createTime" : ISODate("2584-01-05T14:15:47.299Z") } -->> { "createTime" : { "$maxKey" : 1 } } on : mongo2 Timestamp(3, 1) 
+                { "createTime" : { "$minKey" : 1 } } -->> { "createTime" : ISODate("0381-01-05T14:15:47.299Z") } on : mongo1 Timestamp(2, 0)
+                { "createTime" : ISODate("0381-01-05T14:15:47.299Z") } -->> { "createTime" : ISODate("2584-01-05T14:15:47.299Z") } on : mongo3 Timestamp(3, 0)
+                { "createTime" : ISODate("2584-01-05T14:15:47.299Z") } -->> { "createTime" : { "$maxKey" : 1 } } on : mongo2 Timestamp(3, 1)
             test.user
                 shard key: { "_id" : "hashed" }
                 unique: false
@@ -102,15 +102,15 @@ and issue the command to query the status of replication set, we should get a si
                     mongo1	2
                     mongo2	2
                     mongo3	2
-                { "_id" : { "$minKey" : 1 } } -->> { "_id" : NumberLong("-6148914691236517204") } on : mongo1 Timestamp(3, 2) 
-                { "_id" : NumberLong("-6148914691236517204") } -->> { "_id" : NumberLong("-3074457345618258602") } on : mongo1 Timestamp(3, 3) 
-                { "_id" : NumberLong("-3074457345618258602") } -->> { "_id" : NumberLong(0) } on : mongo2 Timestamp(3, 4) 
-                { "_id" : NumberLong(0) } -->> { "_id" : NumberLong("3074457345618258602") } on : mongo2 Timestamp(3, 5) 
-                { "_id" : NumberLong("3074457345618258602") } -->> { "_id" : NumberLong("6148914691236517204") } on : mongo3 Timestamp(3, 6) 
-                { "_id" : NumberLong("6148914691236517204") } -->> { "_id" : { "$maxKey" : 1 } } on : mongo3 Timestamp(3, 7) 
+                { "_id" : { "$minKey" : 1 } } -->> { "_id" : NumberLong("-6148914691236517204") } on : mongo1 Timestamp(3, 2)
+                { "_id" : NumberLong("-6148914691236517204") } -->> { "_id" : NumberLong("-3074457345618258602") } on : mongo1 Timestamp(3, 3)
+                { "_id" : NumberLong("-3074457345618258602") } -->> { "_id" : NumberLong(0) } on : mongo2 Timestamp(3, 4)
+                { "_id" : NumberLong(0) } -->> { "_id" : NumberLong("3074457345618258602") } on : mongo2 Timestamp(3, 5)
+                { "_id" : NumberLong("3074457345618258602") } -->> { "_id" : NumberLong("6148914691236517204") } on : mongo3 Timestamp(3, 6)
+                { "_id" : NumberLong("6148914691236517204") } -->> { "_id" : { "$maxKey" : 1 } } on : mongo3 Timestamp(3, 7)
 
 
-We can check the status of the shards as follows: connect to the mongos service `mongo localhost/test -u admin -p 123456` 
+We can check the status of the shards as follows: connect to the mongos service `mongo localhost/test -u admin -p 123456`
 and issue the following command to get the status of the Shards:
 
     mongos> db.user.find({_id: 1 }).explain()
