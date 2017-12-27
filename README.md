@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------------
 
 - Requires Ansible 2.2+
+- Requires Vagrant-hosts plugin (https://github.com/oscar-stack/vagrant-hosts)
 - Expects CentOS/RHEL 7 hosts
 
 Rewrite from [ansible mongodb example](https://github.com/ansible/ansible-examples/tree/master/mongodb) with mongodb3.2, ansible2.2, CentOS 7.
