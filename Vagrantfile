@@ -9,11 +9,13 @@ Vagrant.configure("2") do |config|
     config.vm.define "mongo#{i}" do |node|
         node.vm.box = "centos/7"
         node.vm.hostname = "mongo#{i}"
-        node.vm.network :private_network, ip: "11.0.0.1#{i}"
+        node.vm.network :private_network, ip: "10.254.254.1#{i}"
         node.vm.provider "virtualbox" do |vb|
           vb.memory = "256"
         end
-        node.vm.provision :shell, path: "bootstrap.sh", run: "once"
+
+	      node.vm.provision :shell, inline: "sudo ifup eth1"
+        node.vm.provision :hosts, :sync_hosts => true
 
         if i == N
           node.vm.provision :ansible do |ansible|
